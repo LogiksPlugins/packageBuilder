@@ -119,8 +119,8 @@ $tables = array_filter($tableList, "checkTableName", ARRAY_FILTER_USE_BOTH);
     </div>
     <div id='tab2' class='tab-pane fade paddedInfo'>
         <div class='toolbar text-right'>
-            <i class='fa fa-magic' title='Find Dependency Automatically' onclick="findDependecy(this)"></i>
-            <i class='fa fa-plus' title='Add Dependency' onclick="addBlankDependecy(this)"></i>
+            <i class='fa fa-magic' title='Find Dependency Automatically' onclick="findDependency(this)"></i>
+            <i class='fa fa-plus' title='Add Dependency' onclick="addBlankDependency(this)"></i>
         </div>
         <form>
             <table class='table table-stripped table-hover'>
@@ -198,10 +198,26 @@ $tables = array_filter($tableList, "checkTableName", ARRAY_FILTER_USE_BOTH);
         ?>
     </div>
     <div id='tab5' class='tab-pane fade paddedInfo'>
-        <h3 class='text-center'>Coming Soon ...</h3>
+        <div id='installFolderDetails' class='installFolderDetails'>
+            <?=$htmlInstaller?>
+        </div>
+        <hr>
+        <div class='text-center'>
+            <button type="button" class="btn btn-success" onclick="updateInstallFolder(this)"><i class='fa fa-cube'></i> Build Installer</button>
+            
+            <button type="button" class="btn btn-info" onclick="refreshInstallFolder(this)"><i class='fa fa-refresh'></i> Refresh Installer</button>
+            
+            <button type="button" class="btn btn-danger" onclick="purgeInstallFolder(this)"><i class='fa fa-trash'></i> Purge Installer</button>
+        </div>
     </div>
-    <div id='tab5' class='tab-pane fade paddedInfo'>
-        <h3 class='text-center'>Coming Soon ...</h3>
+    <div id='tab6' class='tab-pane fade paddedInfo'>
+        <div id='issueDetails' class='issueDetails'>
+            
+        </div>
+        <hr>
+        <div class='text-center'>
+            <button type="button" class="btn btn-info" onclick="checkIssues(this)"><i class='fa fa-refresh'></i> Recheck Issues</button>
+        </div>
     </div>
 </div>
 <script>
@@ -209,6 +225,9 @@ $(function() {
     $("#packageConfigForm select").each(function() {
         $(this).val($(this).attr("value"));
     });
+    
+    refreshInstallFolder();
+    checkIssues();
 });
 function updatePackageConfig(btn) {
     qData = $(btn).closest("form").serialize();
@@ -217,7 +236,7 @@ function updatePackageConfig(btn) {
         else lgksToast(data.Data.msg);
     },"json");
 }
-function addBlankDependecy(btn) {
+function addBlankDependency(btn) {
     $(btn).closest(".tab-pane").find("table tbody").append(
             "<tr><td width=100px>0</td><td><input name='dependencies[package][]' type='text' class='form-control' /></td><td><input name='dependencies[vers][]' type='text' class='form-control' /></td><td class='text-right'><i class='fa fa-times' onclick='removeMe(this)'></i></td></tr>"
         );
@@ -227,10 +246,27 @@ function addBlankAuthor(btn) {
             "<tr><td width=100px>0</td><td><input name='authors[name][]' type='text' class='form-control' /></td><td><input name='authors[email][]' type='email' class='form-control' /></td><td><input name='authors[authorid][]' type='text' class='form-control' /></td><td class='text-right'><i class='fa fa-times' onclick='removeMe(this)'></i></td></tr>"
         );
 }
-function findDependecy(btn) {
+function findDependency(btn) {
     
 }
 function removeMe(btn) {
     $(btn).closest("tr").detach();
+}
+function updateInstallFolder(btn) {
+    $("#installFolderDetails").html("<div class='ajaxloading ajaxloading5'><br><br>Building Install Folder<br>Please be patient ...<br><br></div>");
+    $("#installFolderDetails").load(_service("packageBuilder","buildInstallFolder")+"&package=<?=$package?>");
+}
+function refreshInstallFolder(btn) {
+    $("#installFolderDetails").html("<div class='ajaxloading ajaxloading5'><br><br>Refreshing Install Folder<br>Please be patient ...<br><br></div>");
+    $("#installFolderDetails").load(_service("packageBuilder","refreshInstallFolder")+"&package=<?=$package?>");
+}
+function purgeInstallFolder(btn) {
+    $("#installFolderDetails").html("<div class='ajaxloading ajaxloading5'><br><br>Purging Install Folder<br>Please be patient ...<br><br></div>");
+    $("#installFolderDetails").load(_service("packageBuilder","purgeInstallFolder")+"&package=<?=$package?>");
+}
+
+function checkIssues(btn) {
+    $("#issueDetails").html("<div class='ajaxloading ajaxloading5'><br><br>Checking For Issues ...<br><br></div>");
+    $("#issueDetails").load(_service("packageBuilder","checkIssues")+"&package=<?=$package?>");
 }
 </script>
