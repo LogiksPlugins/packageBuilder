@@ -9,7 +9,7 @@ function pageSidebar() {
     return "<div id='sidebarArea'></div>";
 }
 
-_css(["packageGenerator"]);
+_css(["packageBuilder"]);
 printPageComponent(false,[
 		"toolbar"=>[
 			"reloadPage"=>["icon"=>"<i class='fa fa-refresh'></i>"],
@@ -21,7 +21,7 @@ printPageComponent(false,[
 		"sidebar"=>"pageSidebar",
 		"contentArea"=>"pageContentArea"
 	]);
-_js(["packageGenerator"]);
+_js(["packageBuilder"]);
 ?>
 <style>
 .paddedInfo {
@@ -48,19 +48,22 @@ $(function() {
     listPackages();
 });
 function reloadPage() {
-    window.location.reload();
+    //window.location.reload();
+    listPackages();
 }
 function listPackages() {
     $("#sidebarArea").html("<div class='ajaxloading ajaxloading5'></div>");
     processAJAXQuery(_service("packageBuilder","listPackages"),function(data) {
         $("#sidebarArea").html("<ul class='list-group'></ul>");
         $.each(data.Data, function(key,dataSet) {
-            $.each(dataSet, function(f,a) {
-                if(a=="nok")
-                    $("#sidebarArea>ul").prepend("<li class='list-group-item list-group-item-warning' data-refid='"+f+"' title='Error found in package'>"+f+"</li>");
-                else
-                    $("#sidebarArea>ul").append("<li class='list-group-item' data-refid='"+f+"'>"+f+"</li>");
-            });
+            if(typeof dataSet == "object" && dataSet!=null) {
+                $.each(dataSet, function(f,a) {
+                    if(a=="nok")
+                        $("#sidebarArea>ul").prepend("<li class='list-group-item list-group-item-warning' data-refid='"+f+"' title='Error found in package'>"+f+"</li>");
+                    else
+                        $("#sidebarArea>ul").append("<li class='list-group-item' data-refid='"+f+"'>"+f+"</li>");
+                });
+            }
         });
     },"json");
 }

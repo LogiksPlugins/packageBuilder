@@ -567,6 +567,14 @@ function buildInstallFolder($packageDir, $appPath) {
     if(file_exists($featureFile)) {
         $finalFileList[str_replace($appPath,"",$featureFile)] = "CONFIG";
     }
+    $featureFile = $appPath."config/features/{$packageID}.json";
+    if(file_exists($featureFile)) {
+        $finalFileList[str_replace($appPath,"",$featureFile)] = "CONFIG";
+    }
+    $featureFile = $appPath."config/features/".strtolower($packageID).".json";
+    if(file_exists($featureFile)) {
+        $finalFileList[str_replace($appPath,"",$featureFile)] = "CONFIG";
+    }
 
     //printArray($finalFileList);exit();
 
@@ -606,7 +614,9 @@ function buildInstallFolder($packageDir, $appPath) {
                 }
             } elseif($type=="CONFIG") {
                 $src = $appPath . $ff;
-                $dest = $packageDir.".install/feature.cfg";
+                $ext = explode(".",$src);
+                $ext = end($ext);
+                $dest = $packageDir."feature.{$ext}";
                 
                 $a = copy($src, $dest);
                 if(!$a) {
@@ -660,7 +670,7 @@ function buildInstallFolder($packageDir, $appPath) {
         }
         if(count($sqlSchema)>0) {
             $sqlSchema = implode(";\n\n",$sqlSchema).";\n\n";
-            $srcFile = $packageDir.".install/sql/schema.sql";
+            $srcFile = $packageDir."sql/schema.sql";
             
             if(!is_dir(dirname($srcFile))) {
                 mkdir(dirname($srcFile), 0777, true);
@@ -688,8 +698,8 @@ function buildInstallFolder($packageDir, $appPath) {
             }
         }
         if(count($sqlSchema)>0) {
-            $srcFile1 = $packageDir.".install/sql/data.sql";
-            $srcFile2 = $packageDir.".install/sql/dbdata.json";
+            $srcFile1 = $packageDir."sql/data.sql";
+            $srcFile2 = $packageDir."sql/dbdata.json";
             
             if(!is_dir(dirname($srcFile1))) {
                 mkdir(dirname($srcFile1), 0777, true);

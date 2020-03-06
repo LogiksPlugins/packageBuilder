@@ -50,7 +50,7 @@ $tableList = _db()->get_tableList();
 $_ENV['MODNAME'] = $packageName;
 $tables = array_filter($tableList, "checkTableName", ARRAY_FILTER_USE_BOTH);
 ?>
-<h3 style="margin-top: 9px;">&nbsp;Package : <?=$package?></h3>
+<h3 style="margin-top: 9px;">&nbsp;Package : <?=$package?> <i title='Edit Readme.md' class='fa fa-pencil pull-right' style='margin-right:20px;cursor:pointer;' onclick='editPackageReadme(this)'></i></h3>
 <ul class='nav nav-tabs nav-justified'>
   <li class='active'><a href='#tab1'>Properties</a></li>
   <li><a href='#tab2'>Dependencies</a></li>
@@ -64,12 +64,15 @@ $tables = array_filter($tableList, "checkTableName", ARRAY_FILTER_USE_BOTH);
         <form id='packageConfigForm' class="form-horizontal">
             <?php
                 foreach($formFields as $key=>$type) {
+                    $required = "";
+                    if(in_array($key, ["name"])) $required = "required";
+                    
                     if($type=="boolean") {
                         ?>
                         <div class="form-group">
-                            <label class="control-label col-sm-2" for="<?=$key?>"><?=toTitle(_ling($key))?>:</label>
+                            <label class="control-label col-sm-2" for="<?=$key?>"><?=toTitle(_ling($key))?> <?=(strlen($required)>0)?"*":""?>:</label>
                             <div class="col-sm-10">
-                                <select class='form-control' id="<?=$key?>" name="<?=$key?>" value='<?=(getPackageConfig($key)?"true":"false")?>'>
+                                <select class='form-control' id="<?=$key?>" name="<?=$key?>" value='<?=(getPackageConfig($key)?"true":"false")?>' <?=$required?>>
                                     <option value='true'>True</option>
                                     <option value='false'>False</option>
                                 </select>
@@ -79,9 +82,9 @@ $tables = array_filter($tableList, "checkTableName", ARRAY_FILTER_USE_BOTH);
                     } elseif($type=="select" && isset($formSelectors[$key])) {
                         ?>
                         <div class="form-group">
-                            <label class="control-label col-sm-2" for="<?=$key?>"><?=toTitle(_ling($key))?>:</label>
+                            <label class="control-label col-sm-2" for="<?=$key?>"><?=toTitle(_ling($key))?> <?=(strlen($required)>0)?"*":""?>:</label>
                             <div class="col-sm-10">
-                                <select class='form-control' id="<?=$key?>" name="<?=$key?>" value='<?=getPackageConfig($key)?>'>
+                                <select class='form-control' id="<?=$key?>" name="<?=$key?>" value='<?=getPackageConfig($key)?>' <?=$required?>>
                                     <?php
                                         foreach($formSelectors[$key] as $a=>$b) {
                                             echo "<option value='$b'>$a</option>";
@@ -94,9 +97,9 @@ $tables = array_filter($tableList, "checkTableName", ARRAY_FILTER_USE_BOTH);
                     } else {
                         ?>
                         <div class="form-group">
-                            <label class="control-label col-sm-2" for="<?=$key?>"><?=toTitle(_ling($key))?>:</label>
+                            <label class="control-label col-sm-2" for="<?=$key?>"><?=toTitle(_ling($key))?> <?=(strlen($required)>0)?"*":""?>:</label>
                             <div class="col-sm-10">
-                              <input type="<?=$type?>" class="form-control" id="<?=$key?>" name="<?=$key?>" placeholder="Enter <?=$key?>" value='<?=getPackageConfig($key)?>'>
+                              <input type="<?=$type?>" class="form-control" id="<?=$key?>" name="<?=$key?>" placeholder="Enter <?=$key?>" value='<?=getPackageConfig($key)?>' <?=$required?> />
                             </div>
                         </div>
                         <?php
@@ -234,6 +237,8 @@ function updatePackageConfig(btn) {
     processAJAXPostQuery(_service("packageBuilder","updatePackage")+"&package=<?=$package?>", qData, function(data) {
         if(data.Data.status=="success") lgksToast("Package Updated Successfully");
         else lgksToast(data.Data.msg);
+        
+        listPackages();
     },"json");
 }
 function addBlankDependency(btn) {
@@ -268,5 +273,8 @@ function purgeInstallFolder(btn) {
 function checkIssues(btn) {
     $("#issueDetails").html("<div class='ajaxloading ajaxloading5'><br><br>Checking For Issues ...<br><br></div>");
     $("#issueDetails").load(_service("packageBuilder","checkIssues")+"&package=<?=$package?>");
+}
+function editPackageReadme(btn) {
+    parent.openLinkFrame("Readme.md", _link("modules/cmsEditor")+"&type=autocreate&src=/pluginsDev/<?=$package?>/Readme.md");
 }
 </script>
