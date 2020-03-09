@@ -45,10 +45,15 @@ $formSelectors = [
                 "stable"=>"stable",
             ],
     ];
-    
-$tableList = _db()->get_tableList();
+
 $_ENV['MODNAME'] = $packageName;
-$tables = array_filter($tableList, "checkTableName", ARRAY_FILTER_USE_BOTH);
+if(_db()) {
+    $tableList = _db()->get_tableList();
+    $tables = array_filter($tableList, "checkTableName", ARRAY_FILTER_USE_BOTH);
+} else {
+    $tableList = [];
+    $tables = [];
+}
 ?>
 <h3 style="margin-top: 9px;">&nbsp;Package : <?=$package?> <i title='Edit Readme.md' class='fa fa-pencil pull-right' style='margin-right:20px;cursor:pointer;' onclick='editPackageReadme(this)'></i></h3>
 <ul class='nav nav-tabs nav-justified'>

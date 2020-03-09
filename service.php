@@ -4,7 +4,7 @@ if(!defined('ROOT')) exit('No direct script access allowed');
 $appPath = ROOT.APPS_FOLDER.CMS_SITENAME."/";
 $configFile = "logiks.json";
 
-$noShow = ["z","z1"];
+$noShow = ["z","z1",".gitkeep",".gitignore",".git"];
 
 switch($_GET['action']) {
     case "listPackages":
@@ -37,7 +37,10 @@ switch($_GET['action']) {
             
             $fss[$a] = $fs0;//array_merge($fss, $fs0);
         }
-        
+        foreach($fss as $a=>$fs) {
+            ksort($fs);
+            $fss[$a] = $fs;
+        }
         printServiceMsg($fss);
         break;
     case "loadPackage":
