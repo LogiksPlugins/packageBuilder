@@ -6,14 +6,33 @@ $configFile = "logiks.json";
 
 $noShow = ["z","z1",".gitkeep",".gitignore",".git"];
 
+if(isset($_GET['package'])) {
+    $packageType = current(explode("/",$_GET['package']));
+    
+    switch($packageType) {
+        case "modules":
+        case "vendors":
+            $_GET['package_path'] = $appPath."pluginsDev/{$_GET['package']}/";
+            break;
+        case "modules_local":
+            $_GET['package_path'] = str_replace("modules_local/","",$appPath."plugins/modules/{$_GET['package']}/");
+            break;
+        case "vendors_local":
+            $_GET['package_path'] = str_replace("vendors_local/","",$appPath."plugins/vendors/{$_GET['package']}/");
+            break;
+    }
+}
+
 switch($_GET['action']) {
     case "listPackages":
         $fs = [
-                "modules"=>$appPath."pluginsDev/modules/",
-                "vendors"=>$appPath."pluginsDev/vendors/",
+                $appPath."pluginsDev/modules/"=>"modules",
+                $appPath."pluginsDev/vendors/"=>"vendors",
+                $appPath."plugins/modules/"=>"modules_local",
+                $appPath."plugins/vendors/"=>"vendors_local",
             ];
         $fss = [];
-        foreach($fs as $a=>$dir) {
+        foreach($fs as $dir=>$a) {
             $fs0 = scandir($dir);
             $fs0 = array_slice($fs0,2);
             
@@ -22,15 +41,29 @@ switch($_GET['action']) {
                 if(in_array($f,$noShow)) {
                     continue;
                 }
-                $fs0["{$a}/{$f}"] = "ok";
                 
-                if($a=="modules") {
-                    if(!file_exists($dir."{$f}/logiks.json")) {
-                        $fs0["{$a}/{$f}"] = "nok";
+                if($a=="modules_local" || $a=="vendors_local") {
+                    if(!file_exists($dir."{$f}/.git") || !is_dir(($dir."{$f}/.git"))) {
+                        continue;
                     }
-                } elseif($a=="vendors") {
+                    //$a = current(explode("_",$a));
+                }
+                
+                $fs0["{$a}/{$f}"] = [];//"ok"
+                
+                if($a=="modules" || $a=="modules_local") {
+                    if(!file_exists($dir."{$f}/.git")) {
+                        $fs0["{$a}/{$f}"][] = "nogit";
+                    } 
+                    if(!file_exists($dir."{$f}/logiks.json")) {
+                        $fs0["{$a}/{$f}"][] = "nok";
+                    }
+                } elseif($a=="vendors" || $a=="vendors_local") {
+                    if(!file_exists($dir."{$f}/.git")) {
+                        $fs0["{$a}/{$f}"][] = "nogit";
+                    } 
                     if(!file_exists($dir."{$f}/boot.php")) {
-                        $fs0["{$a}/{$f}"] = "nok";
+                        $fs0["{$a}/{$f}"][] = "nok";
                     }
                 }
             }
@@ -52,8 +85,9 @@ switch($_GET['action']) {
         break;
     case "updatePackage":
         if(isset($_GET['package']) && isset($_POST) && count($_POST)>0) {
-            $packageConfig = $appPath."pluginsDev/{$_GET['package']}/{$configFile}";
+            $packageConfig = $_GET['package_path'].$configFile;
             $_POST['type'] = dirname($_GET['package']);
+            $_POST['type'] = str_replace("_local","",$_POST['type']);
             
             $config = [];
             if(file_exists($packageConfig)) {
@@ -108,7 +142,7 @@ switch($_GET['action']) {
     case "findIssues":
         $dirList = [
                $appPath."pluginsDev/modules/"=>true,
-               //$appPath."plugins/modules/"=>false,
+               $appPath."plugins/modules/"=>false,
             ];
         
         $counter = 0;
@@ -116,7 +150,12 @@ switch($_GET['action']) {
         $finalTableUsedList = [];
         $finalModuleInfo = [];
         
-        $tableList = _db()->get_tableList();
+        if(_db()===false) {
+            $tableList = [];
+        } else {
+            $tableList = _db()->get_tableList();
+        }
+        
         
         foreach($dirList as $dir=>$scanModule) {
             $fss = scandir($dir);
@@ -247,7 +286,7 @@ switch($_GET['action']) {
     case "checkIssues":
         if(isset($_GET['package']) && strlen($_GET['package'])>0) {
             $packageID = $_GET['package'];
-            $packageDir = $appPath."pluginsDev/{$packageID}/";
+            $packageDir = $_GET['package_path'];
             $tableList = _db()->get_tableList();
             
             echo getModuleIssues(basename($packageID), $packageDir, $tableList);
@@ -258,7 +297,7 @@ switch($_GET['action']) {
     case "refreshInstallFolder":
         if(isset($_GET['package']) && strlen($_GET['package'])>0) {
             $packageID = $_GET['package'];
-            $packageDir = $appPath."pluginsDev/{$packageID}/";
+            $packageDir = $_GET['package_path'];
             
             if(is_dir($packageDir)) {
                 $htmlInstaller = $packageDir.".install/";
@@ -288,7 +327,7 @@ switch($_GET['action']) {
     case "purgeInstallFolder":
         if(isset($_GET['package']) && strlen($_GET['package'])>0) {
             $packageID = $_GET['package'];
-            $packageDir = $appPath."pluginsDev/{$packageID}/";
+            $packageDir = $_GET['package_path'];
             
             if(is_dir($packageDir)) {
                 $dirInstaller = $packageDir.".install";
@@ -308,7 +347,7 @@ switch($_GET['action']) {
     case "buildInstallFolder":
         if(isset($_GET['package']) && strlen($_GET['package'])>0) {
             $packageID = $_GET['package'];
-            $packageDir = $appPath."pluginsDev/{$packageID}/";
+            $packageDir = $_GET['package_path'];
             
             if(is_dir($packageDir)) {
                 $ans = buildInstallFolder($packageDir, $appPath);

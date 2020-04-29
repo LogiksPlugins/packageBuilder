@@ -45,6 +45,9 @@ hr {
     margin: 10px;
     font-size: 20px;
 }
+.list-group-item span.label {
+    font-size: 8px;
+}
 </style>
 <script>
 $(function() {
@@ -64,10 +67,18 @@ function listPackages() {
         $.each(data.Data, function(key,dataSet) {
             if(typeof dataSet == "object" && dataSet!=null) {
                 $.each(dataSet, function(f,a) {
-                    if(a=="nok")
-                        $("#sidebarArea>ul.list-group-one").append("<li class='list-group-item list-group-item-warning' data-refid='"+f+"' title='Error found in package'>"+f+"</li>");
-                    else
-                        $("#sidebarArea>ul.list-group-two").append("<li class='list-group-item' data-refid='"+f+"'>"+f+"</li>");
+                    clz = "";
+                    if(a.indexOf("nogit")>=0) {
+                        clz = "<span class='label label-danger pull-right'>nogit</span>";
+                    } else {
+                        clz = "<span class='label label-success pull-right'>git</span>";
+                    }
+                    
+                    if(a.indexOf("nok")>=0) {
+                        $("#sidebarArea>ul.list-group-one").append("<li class='list-group-item list-group-item-warning' data-refid='"+f+"' title='Error found in package'>"+clz+f+"</li>");
+                    } else {
+                        $("#sidebarArea>ul.list-group-two").append("<li class='list-group-item' data-refid='"+f+"'>"+clz+f+"</li>");
+                    }
                 });
             }
         });

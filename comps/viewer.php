@@ -3,8 +3,7 @@ if(!defined('ROOT')) exit('No direct script access allowed');
 
 $package = $_GET['package'];
 $packageName = basename($package);
-
-$packageDir = $appPath."pluginsDev/{$package}/";
+$packageDir = $_GET['package_path'];
 
 if(!(file_exists($packageDir) && is_dir($packageDir))) {
     echo "<h3 style='text-align: center;'>Sorry Package `{$package}` Not Found</h3>";
@@ -54,6 +53,17 @@ if(_db()) {
     $tableList = [];
     $tables = [];
 }
+
+$gitDetails = [];
+$gitConfig = $packageDir.".git/config";
+if(file_exists($gitConfig)) {
+    $gitDetails["description"] = file_get_contents(dirname($gitConfig)."/description");
+    $gitDetails["config"] = file_get_contents($gitConfig);
+    
+    if(file_exists($packageDir.".gitignore")) {
+        $gitDetails[".gitignore"] = file_get_contents($packageDir.".gitignore");
+    }
+}
 ?>
 <h3 style="margin-top: 9px;">&nbsp;Package : <?=$package?> <i title='Edit Readme.md' class='fa fa-pencil pull-right' style='margin-right:20px;cursor:pointer;' onclick='editPackageReadme(this)'></i></h3>
 <ul class='nav nav-tabs nav-justified'>
@@ -63,6 +73,7 @@ if(_db()) {
   <li><a href='#tab4'>Tables</a></li>
   <li><a href='#tab5'>Installer</a></li>
   <li><a href='#tab6'>Issues</a></li>
+  <li><a href='#tab7'>GitConfig</a></li>
 </ul>
 <div class='tab-content'>
     <div id='tab1' class='tab-pane fade paddedInfo in active'>
@@ -226,6 +237,14 @@ if(_db()) {
         <div class='text-center'>
             <button type="button" class="btn btn-info" onclick="checkIssues(this)"><i class='fa fa-refresh'></i> Recheck Issues</button>
         </div>
+    </div>
+    <div id='tab7' class='tab-pane fade paddedInfo'>
+        <?php
+            foreach($gitDetails as $a=>$b) {
+                echo "<h4>{$a}</h4>";
+                echo "<pre>{$b}</pre>";
+            }
+        ?>
     </div>
 </div>
 <script>
