@@ -68,6 +68,7 @@ if(file_exists($gitConfig)) {
 <h3 style="margin-top: 9px;">&nbsp;Package : <?=$package?> <i title='Edit Readme.md' class='fa fa-pencil pull-right' style='margin-right:20px;cursor:pointer;' onclick='editPackageReadme(this)'></i></h3>
 <ul class='nav nav-tabs nav-justified'>
   <li class='active'><a href='#tab1'>Properties</a></li>
+  <li><a href='#tab8'>Policies</a></li>
   <li><a href='#tab2'>Dependencies</a></li>
   <li><a href='#tab3'>Authors</a></li>
   <li><a href='#tab4'>Tables</a></li>
@@ -134,6 +135,42 @@ if(file_exists($gitConfig)) {
                     <button type="button" class="btn btn-success" onclick="updatePackageConfig(this)">Submit</button>
                 </div>
             </div>
+        </form>
+    </div>
+    <div id='tab8' class='tab-pane fade paddedInfo'>
+        <div class='toolbar text-right'>
+            <!--<i class='fa fa-magic' title='Find Dependency Automatically' onclick="findDependency(this)"></i>-->
+            <i class='fa fa-plus' title='Add Dependency' onclick="addBlankPolicyy(this)"></i>
+        </div>
+        <form>
+            <table class='table table-stripped table-hover'>
+                <thead>
+                    <tr>
+                        <th width=100px>SL#</th>
+                        <th>Policy</th>
+                        <th>Default Allow</th>
+                        <th width=100px></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                        if(isset($_ENV['PACKAGE_CONFIG']['policies'])) {
+                            $count = 1;
+                            foreach($_ENV['PACKAGE_CONFIG']['policies'] as $pack=>$ver) {
+                                echo "<tr><td width=100px>{$count}</td><td><input name='policies[policystr][]' type='text' class='form-control' value='{$pack}' /></td><td><input name='policies[policy_allow][]' type='text' class='form-control' value='{$ver}' /></td><td class='text-right'><i class='fa fa-times' onclick='removeMe(this)'></i></td></tr>";
+                                $count++;
+                            }
+                        }
+                    ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th class='text-center' colspan=100>
+                            <button type="button" class="btn btn-success" onclick="updatePackageConfig(this)">Update</button>
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
         </form>
     </div>
     <div id='tab2' class='tab-pane fade paddedInfo'>
@@ -264,6 +301,11 @@ function updatePackageConfig(btn) {
         
         listPackages();
     },"json");
+}
+function addBlankPolicyy(btn) {
+    $(btn).closest(".tab-pane").find("table tbody").append(
+            "<tr><td width=100px>0</td><td><input name='policies[policystr][]' type='text' class='form-control' /></td><td><input name='policies[policy_allow][]' type='text' class='form-control' /></td><td class='text-right'><i class='fa fa-times' onclick='removeMe(this)'></i></td></tr>"
+        );
 }
 function addBlankDependency(btn) {
     $(btn).closest(".tab-pane").find("table tbody").append(

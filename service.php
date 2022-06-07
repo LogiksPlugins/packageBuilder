@@ -101,6 +101,13 @@ switch($_GET['action']) {
             if(isset($_POST['private'])) {
                 $_POST['private'] = ($_POST['private']=="true")?true:false;
             }
+            if(isset($_POST['policies'])) {
+                $policies = $_POST['policies'];
+                $_POST['policies'] = [];
+                foreach($policies['policystr'] as $a=>$b) {
+                    $_POST['policies'][$b]=$policies['policy_allow'][$a];
+                }
+            }
             if(isset($_POST['dependencies'])) {
                 $dependencies = $_POST['dependencies'];
                 $_POST['dependencies'] = [];
@@ -127,7 +134,7 @@ switch($_GET['action']) {
                 $_POST['repository']['type'] = "git";
             }
             
-            
+            // printArray($_POST);exit();
             $config = array_merge($config, $_POST);
             $a = file_put_contents($packageConfig, json_encode($config,JSON_PRETTY_PRINT));
             

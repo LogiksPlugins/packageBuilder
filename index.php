@@ -52,6 +52,8 @@ hr {
 <script>
 $(function() {
     $("#sidebarArea").delegate(".list-group-item","click", function() {
+        $("#sidebarArea").find(".list-group-item.active").removeClass("active");
+        $(this).addClass("active");
         loadPackage($(this).data('refid'));
     });
     listPackages();
