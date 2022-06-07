@@ -74,7 +74,11 @@ if(file_exists($gitConfig)) {
   <li><a href='#tab4'>Tables</a></li>
   <li><a href='#tab5'>Installer</a></li>
   <li><a href='#tab6'>Issues</a></li>
-  <li><a href='#tab7'>GitConfig</a></li>
+  <?php
+    if($gitDetails && count($gitDetails)>0) {
+        echo "<li><a href='#tab7'>GitConfig</a></li>";
+    }
+  ?>
 </ul>
 <div class='tab-content'>
     <div id='tab1' class='tab-pane fade paddedInfo in active'>
