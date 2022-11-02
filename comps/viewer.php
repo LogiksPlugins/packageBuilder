@@ -70,6 +70,7 @@ if(file_exists($gitConfig)) {
   <li class='active'><a href='#tab1'>Properties</a></li>
   <li><a href='#tab8'>Policies</a></li>
   <li><a href='#tab2'>Dependencies</a></li>
+  <li><a href='#tab9'>Navs</a></li>
   <li><a href='#tab3'>Authors</a></li>
   <li><a href='#tab4'>Tables</a></li>
   <li><a href='#tab5'>Installer</a></li>
@@ -287,6 +288,45 @@ if(file_exists($gitConfig)) {
             }
         ?>
     </div>
+    <div id='tab9' class='tab-pane fade paddedInfo'>
+        <div class='toolbar text-right'>
+            <!--<i class='fa fa-magic' title='Find Dependency Automatically' onclick="findDependency(this)"></i>-->
+            <i class='fa fa-plus' title='Add Nav/Menu Entry' onclick="addBlankNav(this)"></i>
+        </div>
+        <form>
+            <table class='table table-stripped table-hover'>
+                <thead>
+                    <tr>
+                        <th width=100px>SL#</th>
+                        <th>Title</th>
+                        <th>Link</th>
+                        <th>Iconpath</th>
+                        <th>Tips</th>
+                        <th>To Check</th>
+                        <th width=100px></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                        if(isset($_ENV['PACKAGE_CONFIG']['navigation'])) {
+                            $count = 1;
+                            foreach($_ENV['PACKAGE_CONFIG']['navigation'] as $navID=>$navData) {
+                                echo "<tr><td width=100px>{$count}</td><td><input name='navigation[title][]' type='text' class='form-control' value='{$navData['title']}' /></td><td><input name='navigation[link][]' type='text' class='form-control' value='{$navData['link']}' /></td><td><input name='navigation[iconpath][]' type='text' class='form-control' value='{$navData['iconpath']}' /></td><td><input name='navigation[tips][]' type='text' class='form-control' value='{$navData['tips']}' /></td><td><input name='navigation[to_check][]' type='text' class='form-control' value='{$navData['to_check']}' /></td><td class='text-right'><i class='fa fa-times' onclick='removeMe(this)'></i></td></tr>";
+                                $count++;
+                            }
+                        }
+                    ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th class='text-center' colspan=100>
+                            <button type="button" class="btn btn-success" onclick="updatePackageConfig(this)">Update</button>
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+        </form>
+    </div>
 </div>
 <script>
 $(function() {
@@ -319,6 +359,11 @@ function addBlankDependency(btn) {
 function addBlankAuthor(btn) {
     $(btn).closest(".tab-pane").find("table tbody").append(
             "<tr><td width=100px>0</td><td><input name='authors[name][]' type='text' class='form-control' /></td><td><input name='authors[email][]' type='email' class='form-control' /></td><td><input name='authors[authorid][]' type='text' class='form-control' /></td><td class='text-right'><i class='fa fa-times' onclick='removeMe(this)'></i></td></tr>"
+        );
+}
+function addBlankNav(btn) {
+    $(btn).closest(".tab-pane").find("table tbody").append(
+            "<tr><td width=100px>0</td><td><input name='navigation[title][]' type='text' class='form-control' /></td><td><input name='navigation[link][]' type='text' class='form-control' /></td><td><input name='navigation[iconpath][]' type='text' class='form-control' /></td><td><input name='navigation[tips][]' type='text' class='form-control' /></td><td><input name='navigation[to_check][]' type='text' class='form-control' /></td><td class='text-right'><i class='fa fa-times' onclick='removeMe(this)'></i></td></tr>"
         );
 }
 function findDependency(btn) {

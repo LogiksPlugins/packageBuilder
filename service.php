@@ -133,6 +133,20 @@ switch($_GET['action']) {
                 $_POST['repository']['url'] = $url;
                 $_POST['repository']['type'] = "git";
             }
+            if(isset($_POST['navigation'])) {
+                $navigation = $_POST['navigation'];
+                $_POST['navigation'] = [];
+                
+                foreach($navigation['title'] as $a=>$b) {
+                    $_POST['navigation'][]=[
+                            "title"=>$navigation['title'][$a],
+                            "link"=>$navigation['link'][$a],
+                            "iconpath"=>$navigation['iconpath'][$a],
+                            "tips"=>$navigation['tips'][$a],
+                            "to_check"=>$navigation['to_check'][$a],
+                        ];
+                }
+            }
             
             // printArray($_POST);exit();
             $config = array_merge($config, $_POST);
