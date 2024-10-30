@@ -725,15 +725,29 @@ function buildInstallFolder($packageDir, $appPath) {
     //DB Schema
     if(count($tables)>0) {
         $sqlSchema = [];
+        $finalDBConfig = [];
+        
+        $dbStatus=_db()->get_dbObjects();
+        
         foreach($tables as $tbl) {
             $data = _db()->_RAW("SHOW CREATE TABLE {$tbl}")->_GET();
             if(isset($data[0])) {
               $sqlSchema[] = $data[0]['Create Table'];
             }
+            
+            $finalDBConfig[$tbl] = ["info"=>[], "columns"=>[]];
+            $cols=_db()->get_defination($tbl);
+            $info=$dbStatus['tables'][$tbl];
+            
+            $finalDBConfig[$tbl]['info'] = $info;
+            
+            foreach($cols as $col) {
+                $finalDBConfig[$tbl]['columns'][$col[0]] = $col;
+            }
         }
         if(count($sqlSchema)>0) {
             $sqlSchema = implode(";\n\n",$sqlSchema).";\n\n";
-            $srcFile = $packageDir."sql/schema.sql";
+            $srcFile = $packageDir.".install/sql/schema.sql";
             
             if(!is_dir(dirname($srcFile))) {
                 mkdir(dirname($srcFile), 0777, true);
@@ -745,13 +759,17 @@ function buildInstallFolder($packageDir, $appPath) {
                 $errorFiles[] = $srcFile;
             }
         }
+        if(count($finalDBConfig)>0) {
+            $fileJSON_SCHEMA = $packageDir.".install/sql/schema.json";
+            file_put_contents($fileJSON_SCHEMA, json_encode($finalDBConfig, JSON_PRETTY_PRINT));
+        }
         //printArray($sqlSchema);
     }
     //DB Data
     if(count($tablesData)>0) {
         $sqlData = [];$jsonData = [];
         foreach($tablesData as $tbl) {
-            $data = _db()->_RAW("SELECT * FROM {$tbl} LIMIT 1000")->_GET();
+            $data = _db()->_RAW("SELECT * FROM {$tbl} LIMIT 10000")->_GET();
             if($data) {
                 $sqlData[$tbl] = [];
                 foreach($data as $row) {
@@ -761,8 +779,8 @@ function buildInstallFolder($packageDir, $appPath) {
             }
         }
         if(count($sqlSchema)>0) {
-            $srcFile1 = $packageDir."sql/data.sql";
-            $srcFile2 = $packageDir."sql/dbdata.json";
+            $srcFile1 = $packageDir.".install/sql/data.sql";
+            $srcFile2 = $packageDir.".install/sql/dbdata.json";
             
             if(!is_dir(dirname($srcFile1))) {
                 mkdir(dirname($srcFile1), 0777, true);
